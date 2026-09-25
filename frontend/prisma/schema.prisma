@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+
+model Users {
+  id Int @id @default(autoincrement())
+  name String 
+  email String @unique
+  password String?
+  created_at DateTime @default(now())
+
+  acounts Account[]
+  conversation Conversation[]
+}
+
+
+
+
+model Account {
+  id                Int      @id @default(autoincrement())
+  userId            Int
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?  @db.Text
+  access_token      String?  @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?  @db.Text
+  session_state     String?
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+
+model Conversation {
+  id String @id @default(uuid()) @db.VarChar(36)
+  userId Int
+  user Users @relation(fields : [userId] , references:[id] , onDelete: Cascade)
+  title String 
+  createdAt DateTime @default(now())
+
+  chats Chat[]
+}
+
+enum Role {
+  User
+  Ai
+}
+
+model Chat {
+  id Int @id @default(autoincrement())
+  conversationId String @db.VarChar(36)
+  conversation Conversation @relation(fields: [conversationId] , references:[id] , onDelete:Cascade)
+  role Role @default(User)
+  text Json
+  createdAt DateTime @default(now())
+}
