@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { getServerSession } from "next-auth/next";
-import  { authOptions } from '@/app/api/auth/[...nextauth]/option';
 import { getToken } from 'next-auth/jwt';
 
 export async function proxy(request: NextRequest) {
@@ -12,11 +10,6 @@ export async function proxy(request: NextRequest) {
         secret: process.env.NEXTAUTH_SECRET,
     });
 
-    console.log("token" , token)
-
-    const session = await getServerSession(authOptions);
-
-    console.log("token" , token)
 
     const url = request.nextUrl;
 

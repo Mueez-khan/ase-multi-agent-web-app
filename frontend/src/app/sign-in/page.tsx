@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { redirect } from 'next/navigation';
 import Link from "next/link";
 import {
   Eye,
@@ -59,7 +60,7 @@ export default function SignInPage() {
       console.log("Login successful");
 
       // Redirect after successful login
-      window.location.href = "/";
+      redirect('/')
 
     } catch (error) {
       console.error("Login error:", error);
@@ -581,8 +582,7 @@ export default function SignInPage() {
               mt-6
               text-center
               text-sm
-              text-zinc-500
-            ">
+              text-zinc-500">
               Don't have an account?{" "}
 
               <Link

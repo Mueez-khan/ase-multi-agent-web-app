@@ -4,7 +4,9 @@ import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma"
 import GoogleProvider from "next-auth/providers/google";
 
+
 export const authOptions : NextAuthOptions = {
+    
     
     providers: [
         // Write code for google login 
@@ -21,7 +23,7 @@ export const authOptions : NextAuthOptions = {
                 password : {},
             },
 
-            async authorize(credentials : any) {
+            async authorize(credentials : {email : string , password : string} | undefined ) {
                 if(!credentials?.email || !credentials?.password){
                     throw new Error("All fields are required")
                 }

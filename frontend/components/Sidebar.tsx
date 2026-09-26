@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 function Sidebar({ isOpen }) {
-  const { data: session, status } = useSession()
+  const { data:  status } = useSession()
   const router = useRouter();
 
   const [query, setQuery] = useState('')

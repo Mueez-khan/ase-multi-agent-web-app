@@ -13,7 +13,7 @@ export async function POST(
     { params }: Props
 ) {
     try {
-        let { conversationId } = await params;
+        const { conversationId } = await params;
 
         const session = await getServerSession(authOptions);
 
