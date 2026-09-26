@@ -49,7 +49,7 @@ function Sidebar({ isOpen }) {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      handleUserChats()
+      queueMicrotask(() => handleUserChats());
     }
   }, [status ])
 

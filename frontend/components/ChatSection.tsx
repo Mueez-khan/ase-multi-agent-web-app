@@ -438,9 +438,9 @@ function ChatSection() {
 
   const handleUserChats = useCallback(async () => {
     if (!conversationId) return;
-
+    setLoadingMessages(true);
     try {
-      setLoadingMessages(true);
+      
 
       const result = await fetch(
         `/api/user-chats/${conversationId}`,
@@ -488,7 +488,7 @@ function ChatSection() {
   ======================================================= */
 
   useEffect(() => {
-    handleUserChats();
+    queueMicrotask(() =>   handleUserChats());
   }, [handleUserChats]);
 
   /* =======================================================
