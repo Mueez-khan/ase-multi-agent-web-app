@@ -480,7 +480,19 @@ export default function InkFlowField(props: InkFlowFieldProps) {
     // Every live input goes through this ref: the GL context is built once and
     // must never be torn down by a control change (rule 6).
     const live = useRef({ colors, speed, dissipation, swirl, drift, reach, force })
-    live.current = { colors, speed, dissipation, swirl, drift, reach, force }
+    // live.current = { colors, speed, dissipation, swirl, drift, reach, force }
+
+    useEffect(() => {
+        live.current = {
+            colors,
+            speed,
+            dissipation,
+            swirl,
+            drift,
+            reach,
+            force,
+        };
+    }, [colors, speed, dissipation, swirl, drift, reach, force]);
 
     // Pointer in normalised texture space plus the frame delta that becomes the
     // injected force. `moved` gates the first splat so a load with the cursor

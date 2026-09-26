@@ -12,7 +12,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
 function Sidebar({ isOpen }) {
-  const { data:  status } = useSession()
+  const { status } = useSession()
   const router = useRouter();
 
   const [query, setQuery] = useState('')
@@ -51,7 +51,7 @@ function Sidebar({ isOpen }) {
     if (status === 'authenticated') {
       handleUserChats()
     }
-  }, [status])
+  }, [status ])
 
   const handleNavigation = (id ) => {
     setActiveChat(id)

@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState } from "react"
 import { ArrowRight } from "lucide-react"
 import InkFlowField from "../components/Component"
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation"
+
 const COLORS = {
     bgDeep: "#0A0E27",
     bgDeep2: "#12173A",
@@ -37,25 +38,32 @@ function useTypewriter(
     useEffect(() => {
         const current = words[wordIndex % words.length]
 
-        let timeout: NodeJS.Timeout
+        let delay: number
 
         if (!deleting && text === current) {
-            timeout = setTimeout(() => {
-                setDeleting(true)
-            }, pauseMs)
-        } else if (deleting && text === "") {
-            setDeleting(false)
-
-            setWordIndex((i) => i + 1)
+            delay = pauseMs
         } else {
-            timeout = setTimeout(() => {
-                setText((t) =>
-                    deleting
-                        ? current.slice(0, t.length - 1)
-                        : current.slice(0, t.length + 1)
-                )
-            }, deleting ? deletingMs : typingMs)
+            delay = deleting ? deletingMs : typingMs
         }
+
+        const timeout = setTimeout(() => {
+            if (!deleting && text === current) {
+                setDeleting(true)
+                return
+            }
+
+            if (deleting && text === "") {
+                setDeleting(false)
+                setWordIndex((i) => (i + 1) % words.length)
+                return
+            }
+
+            setText((t) =>
+                deleting
+                    ? current.slice(0, t.length - 1)
+                    : current.slice(0, t.length + 1)
+            )
+        }, delay)
 
         return () => clearTimeout(timeout)
     }, [
@@ -75,42 +83,52 @@ export default function HeroSection() {
     const placeholder = useTypewriter(PROMPTS)
 
     const [focused, setFocused] = useState(false)
-    const [query , setQuery  ] = useState("")
+    const [query, setQuery] = useState("")
 
     const inputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
 
-   
-    const  handleSubmit  = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+
+        if (!query.trim()) {
+            inputRef.current?.focus()
+            return
+        }
+
         console.log(query)
+
         inputRef.current?.focus()
 
-        const uuid = window.crypto.randomUUID();
+        const uuid = window.crypto.randomUUID()
 
-        console.log("The generated uuid " , uuid);
+        console.log("The generated uuid:", uuid)
 
-        
-        const res = await fetch(`api/app-build-req/${uuid}` , {
-          method : 'POST',
-          headers : {
-            "Content-Type": "application/json"
-          },
-          body : JSON.stringify({
-            query : query
-          })
-        })
+        try {
+            const res = await fetch(`/api/app-build-req/${uuid}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: query,
+                }),
+            })
 
-        const data = await res.json();
-        // if(data.success)
-       router.push(`/conversation/${uuid}`)
-     
-        
-        console.log("The data of query Herosection" , data )
+            if (!res.ok) {
+                throw new Error("Failed to send build request")
+            }
 
-        setQuery("")
+            const data = await res.json()
 
+            console.log("The data of query HeroSection:", data)
 
+            router.push(`/conversation/${uuid}`)
+
+            setQuery("")
+        } catch (error) {
+            console.error("Error submitting build request:", error)
+        }
     }
 
     return (
@@ -121,7 +139,6 @@ export default function HeroSection() {
                 fontFamily: "'Inter', system-ui, sans-serif",
             }}
         >
-
             {/* ========================================= */}
             {/* INK FLOW BACKGROUND */}
             {/* ========================================= */}
@@ -151,7 +168,6 @@ export default function HeroSection() {
                 />
             </div>
 
-
             {/* ========================================= */}
             {/* DARK OVERLAY */}
             {/* ========================================= */}
@@ -160,38 +176,27 @@ export default function HeroSection() {
                 className="absolute inset-0"
                 style={{
                     zIndex: 1,
-
                     background:
                         "linear-gradient(180deg, rgba(10,14,39,0.15) 0%, rgba(10,14,39,0.65) 100%)",
-
                     pointerEvents: "none",
                 }}
             />
-
 
             {/* ========================================= */}
             {/* CONTENT */}
             {/* ========================================= */}
 
-            <div
-                className="relative z-10 min-h-screen flex flex-col justify-center items-center px-6 py-24"
-            >
-
+            <div className="relative z-10 min-h-screen flex flex-col justify-center items-center px-6 py-24">
                 <div className="flex flex-col items-center text-center max-w-3xl w-full">
-
                     {/* TITLE */}
 
                     <h1
                         className="font-bold leading-tight mb-5"
                         style={{
                             color: COLORS.textPrimary,
-
                             fontFamily:
                                 "'Space Grotesk', 'Inter', sans-serif",
-
-                            fontSize:
-                                "clamp(36px, 6vw, 64px)",
-
+                            fontSize: "clamp(36px, 6vw, 64px)",
                             textShadow:
                                 "0 4px 30px rgba(0,0,0,0.35)",
                         }}
@@ -199,17 +204,13 @@ export default function HeroSection() {
                         What are you building today?
                     </h1>
 
-
                     {/* SUBTITLE */}
 
                     <p
                         className="font-medium mb-10"
                         style={{
                             color: COLORS.textMuted,
-
-                            fontSize:
-                                "clamp(16px, 2vw, 20px)",
-
+                            fontSize: "clamp(16px, 2vw, 20px)",
                             textShadow:
                                 "0 2px 20px rgba(0,0,0,0.4)",
                         }}
@@ -217,7 +218,6 @@ export default function HeroSection() {
                         Describe the software in your head.
                         Watch it take shape.
                     </p>
-
 
                     {/* ================================= */}
                     {/* INPUT */}
@@ -230,98 +230,69 @@ export default function HeroSection() {
                         <div
                             style={{
                                 display: "flex",
-
                                 alignItems: "center",
-
                                 width: "100%",
-
                                 maxWidth: 560,
-
                                 background:
                                     "rgba(10,14,39,0.55)",
-
-                                border:
-                                    `1px solid ${
-                                        focused
-                                            ? COLORS.amber
-                                            : COLORS.border
-                                    }`,
-
+                                border: `1px solid ${
+                                    focused
+                                        ? COLORS.amber
+                                        : COLORS.border
+                                }`,
                                 borderRadius: 18,
-
-                                padding:
-                                    "6px 6px 6px 20px",
-
-                                backdropFilter:
-                                    "blur(12px)",
-
+                                padding: "6px 6px 6px 20px",
+                                backdropFilter: "blur(12px)",
                                 WebkitBackdropFilter:
                                     "blur(12px)",
-
                                 boxShadow:
                                     "0 10px 40px rgba(0,0,0,0.25)",
-
                                 transition:
                                     "border-color 0.25s ease",
                             }}
                         >
-
                             {/* PREFIX */}
 
                             <span
                                 style={{
                                     color: COLORS.textMuted,
-
-                                    fontFamily:
-                                        "monospace",
-
+                                    fontFamily: "monospace",
                                     marginRight: 10,
                                 }}
                             >
                                 &gt;
                             </span>
 
-
                             {/* INPUT AREA */}
 
                             <div
                                 style={{
                                     position: "relative",
-
                                     flex: 1,
-
                                     textAlign: "left",
                                 }}
                             >
-
                                 <input
                                     ref={inputRef}
                                     value={query}
                                     type="text"
-                                    onChange={(e) => setQuery(e.target.value)}
+                                    onChange={(e) =>
+                                        setQuery(e.target.value)
+                                    }
                                     onFocus={() =>
                                         setFocused(true)
                                     }
-
                                     onBlur={() =>
                                         setFocused(false)
                                     }
-
                                     className="w-full bg-transparent outline-none"
-
                                     style={{
-                                        color:
-                                            COLORS.textPrimary,
-
-                                        fontFamily:
-                                            "monospace",
-
+                                        color: COLORS.textPrimary,
+                                        fontFamily: "monospace",
                                         fontSize: 15,
-
                                         height: 44,
                                     }}
                                 />
-
 
                                 {/* TYPEWRITER */}
 
@@ -329,30 +300,16 @@ export default function HeroSection() {
                                     <div
                                         aria-hidden="true"
                                         style={{
-                                            position:
-                                                "absolute",
-
+                                            position: "absolute",
                                             top: 0,
-
                                             left: 0,
-
                                             height: 44,
-
                                             display: "flex",
-
-                                            alignItems:
-                                                "center",
-
-                                            color:
-                                                COLORS.textMuted,
-
-                                            fontFamily:
-                                                "monospace",
-
+                                            alignItems: "center",
+                                            color: COLORS.textMuted,
+                                            fontFamily: "monospace",
                                             fontSize: 15,
-
-                                            pointerEvents:
-                                                "none",
+                                            pointerEvents: "none",
                                         }}
                                     >
                                         Build&nbsp;
@@ -361,10 +318,7 @@ export default function HeroSection() {
                                         <span
                                             style={{
                                                 marginLeft: 2,
-
-                                                color:
-                                                    COLORS.amber,
-
+                                                color: COLORS.amber,
                                                 animation:
                                                     "blink 1s step-end infinite",
                                             }}
@@ -373,9 +327,7 @@ export default function HeroSection() {
                                         </span>
                                     </div>
                                 )}
-
                             </div>
-
 
                             {/* BUILD BUTTON */}
 
@@ -383,48 +335,27 @@ export default function HeroSection() {
                                 type="submit"
                                 style={{
                                     display: "flex",
-
                                     alignItems: "center",
-
                                     gap: 8,
-
-                                    background:
-                                        COLORS.amber,
-
-                                    color:
-                                        COLORS.bgDeep,
-
+                                    background: COLORS.amber,
+                                    color: COLORS.bgDeep,
                                     fontWeight: 600,
-
                                     fontSize: 14,
-
                                     border: "none",
-
                                     borderRadius: 14,
-
-                                    padding:
-                                        "11px 20px",
-
-                                    cursor:
-                                        "pointer",
-
-                                    whiteSpace:
-                                        "nowrap",
+                                    padding: "11px 20px",
+                                    cursor: "pointer",
+                                    whiteSpace: "nowrap",
                                 }}
                             >
                                 Build
 
-                                <ArrowRight
-                                    size={16}
-                                />
+                                <ArrowRight size={16} />
                             </button>
-
                         </div>
                     </form>
-
                 </div>
             </div>
-
 
             {/* ========================================= */}
             {/* ANIMATION */}
@@ -443,7 +374,6 @@ export default function HeroSection() {
                     }
                 }
             `}</style>
-
         </section>
     )
 }

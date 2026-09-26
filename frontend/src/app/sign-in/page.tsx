@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { redirect } from 'next/navigation';
 import Link from "next/link";
+import { useRouter } from 'next/navigation'
 import {
   Eye,
   EyeOff,
@@ -17,6 +17,7 @@ import {
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const router = useRouter();
 
   const [error, setError] = useState("");
 
@@ -60,7 +61,8 @@ export default function SignInPage() {
       console.log("Login successful");
 
       // Redirect after successful login
-      redirect('/')
+
+      router.push('/')
 
     } catch (error) {
       console.error("Login error:", error);
@@ -583,7 +585,7 @@ export default function SignInPage() {
               text-center
               text-sm
               text-zinc-500">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
 
               <Link
                 href="/sign-up"
