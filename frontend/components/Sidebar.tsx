@@ -11,13 +11,19 @@ import {
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
-function Sidebar({ isOpen }) {
+type ChatType = {
+  id : string,
+  userId : number,
+  title : string
+}
+
+function Sidebar({ isOpen  } : { isOpen : boolean } )  {
   const { status } = useSession()
   const router = useRouter();
 
   const [query, setQuery] = useState('')
-  const [activeChat, setActiveChat] = useState(null)
-  const [chats, setChats] = useState([])
+  const [activeChat, setActiveChat] = useState<string | null>(null)
+  const [chats, setChats] = useState<ChatType[]>([])
 
   const handleUserChats = async () => {
     try {
@@ -41,6 +47,8 @@ function Sidebar({ isOpen }) {
       console.log('Conversations:', data.response)
 
       setChats(data.response || [])
+
+      
     } catch (error) {
       console.error('Error fetching conversations:', error)
       setChats([])
@@ -53,7 +61,13 @@ function Sidebar({ isOpen }) {
     }
   }, [status ])
 
-  const handleNavigation = (id ) => {
+  console.log("Chata" , chats)
+
+  const handleNavigation = (id : string  | null ) => {
+
+    if (!id) return;
+
+
     setActiveChat(id)
     router.push(`/conversation/${id}`)
 
@@ -65,8 +79,9 @@ function Sidebar({ isOpen }) {
     router.push(`/conversation/${uuid}`)
 
   }
+  
   // Search conversations by title
-  const filteredChats = chats.filter((chat) =>
+  const filteredChats = chats.filter((chat  ) =>
     chat.title.toLowerCase().includes(query.toLowerCase())
   )
 
